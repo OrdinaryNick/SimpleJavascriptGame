@@ -6,7 +6,7 @@ const canvasBg = document.getElementById("canvasBg"),
 const canvasWidth = canvasBg.width,
     canvasHeight = canvasBg.height;
 
- player = new Player();
+player = new Player();
 // enemies = [],
 // numEnemies = 5,
 // obstacles = []
@@ -27,8 +27,12 @@ imgSprite.src = "images/sprites.png";
 imgSprite.addEventListener("load", init, false);
 
 function init() {
-    // document.addEventListener("keydown", checkKeyDown, false);
-    // document.addEventListener("keyup", checkKeyUp, false);
+    document.addEventListener("keydown", function (event) {
+        checkKey(event, true)
+    }, false);
+    document.addEventListener("keyup", function (event) {
+        checkKey(event, false)
+    }, false);
     // defineObstacles();
     // initEnemies();
     begin();
@@ -85,11 +89,11 @@ function Player() {
     // Speed of moving player.
     this.speed = 2;
     // Control keys
-    // this.isUpKey = false;
-    // this.isRightKey = false;
-    // this.isDownKey = false;
-    // this.isLeftKey = false;
-    // this.isSpacebar = false;
+    this.isUpKey = false;
+    this.isRightKey = false;
+    this.isDownKey = false;
+    this.isLeftKey = false;
+    this.isSpacebar = false;
     // this.isShooting = false;
     // Shooting variables
     //var numBullets = 10;
@@ -105,7 +109,7 @@ Player.prototype.update = function () {
     this.centerX = this.drawX + (this.width / 2);
     this.centerY = this.drawY + (this.height / 2);
 
-    //this.checkDirection();
+    this.checkDirection();
     //this.checkShooting();
     //this.updateAllBullets();
 };
@@ -115,3 +119,72 @@ Player.prototype.draw = function () {
     ctxEntities.drawImage(imgSprite, this.srcX, this.srcY, this.width, this.height, this.drawX, this.drawY, this.width, this.height);
 };
 
+Player.prototype.checkDirection = function () {
+    let newDrawX = this.drawX,
+        newDrawY = this.drawY,
+        obstacleCollision = false;
+
+    if (this.isUpKey) {
+        newDrawY -= this.speed;
+        this.srcX = 32; // Facing north
+    } else if (this.isDownKey) {
+        newDrawY += this.speed;
+        this.srcX = 0; // South north
+    } else if (this.isRightKey) {
+        newDrawX += this.speed;
+        this.srcX = 0; // Facing east
+    } else if (this.isLeftKey) {
+        newDrawX -= this.speed;
+        this.srcX = 16; // Facing west
+    }
+
+    //obstacleCollision = this.checkObstacleCollision(newDrawX, newDrawY);
+
+    if (!obstacleCollision && !outOfBounds(this, newDrawX, newDrawY)) {
+        this.drawX = newDrawX;
+        this.drawY = newDrawY;
+    }
+};
+
+function checkKey(event, value) {
+    const keyId = event.keyCode || event.which;
+    switch (keyId) {
+        case 38: // Up arrow
+            player.isUpKey = value;
+            event.preventDefault();
+            break;
+        case 39: // Right arrow
+            player.isRightKey = value;
+            event.preventDefault();
+            break;
+        case 40: // Down arrow
+            player.isDownKey = value;
+            event.preventDefault();
+            break;
+        case 37: // Left arrow
+            player.isLeftKey = value;
+            event.preventDefault();
+            break;
+        case 32: // Spacebar
+            player.isSpacebar = value;
+            event.preventDefault();
+            break;
+    }
+}
+
+function outOfBounds(object, x, y) {
+    const
+        newBottomY = y + object.height,
+        newTopY = y,
+        newRightX = x + object.width,
+        newLeftX = x,
+        topBorder = 104 + 16,
+        bottomBorder = 480 + 4 - 16,
+        rightBorder = 480 + 4 - 16,
+        leftBorder = 16;
+
+    return newBottomY > bottomBorder ||
+        newTopY < topBorder ||
+        newRightX > rightBorder ||
+        newLeftX < leftBorder;
+}
