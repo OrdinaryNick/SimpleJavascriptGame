@@ -7,10 +7,10 @@ const canvasWidth = canvasBg.width,
     canvasHeight = canvasBg.height,
     topPadding = 104;
 
-player = new Player();
-// enemies = [],
-// numEnemies = 5,
-obstacles = [];
+const player = new Player();
+let enemies = [];
+const numEnemies = 5;
+let obstacles = [];
 let isPlaying = false;
 
 // || Means that if not exist it will try next and last line safe line.
@@ -35,7 +35,7 @@ function init() {
         checkKey(event, false)
     }, false);
     defineObstacles();
-    // initEnemies();
+    initEnemies();
     begin();
 }
 
@@ -48,12 +48,12 @@ function begin() {
 
 function update() {
     clearCtx(ctxEntities);
-    // updateAllEnemies();
+    updateAllEnemies();
     player.update();
 }
 
 function draw() {
-    // drawAllEnemies
+    drawAllEnemies();
     player.draw();
 }
 
@@ -270,7 +270,7 @@ function defineObstacles() {
         // Jars02
         new Obstacle(7 * tileWidth, topPadding + 12 * tileHeight, smallObstacleWidth, smallObstacleHeight),
         new Obstacle(8 * tileWidth, topPadding + 12 * tileHeight, smallObstacleWidth, smallObstacleHeight),
-        new Obstacle(9 *  tileWidth, topPadding + 12 * tileHeight, smallObstacleWidth, smallObstacleHeight),
+        new Obstacle(9 * tileWidth, topPadding + 12 * tileHeight, smallObstacleWidth, smallObstacleHeight),
         // Jars03
         new Obstacle(20 * tileWidth, topPadding + 24 * tileHeight, smallObstacleWidth, smallObstacleHeight),
         new Obstacle(21 * tileWidth, topPadding + 24 * tileHeight, smallObstacleWidth, smallObstacleHeight),
@@ -279,6 +279,52 @@ function defineObstacles() {
         new Obstacle(20 * tileWidth, topPadding + 25 * tileHeight, smallObstacleWidth, smallObstacleHeight),
         new Obstacle(21 * tileWidth, topPadding + 25 * tileHeight, smallObstacleWidth, smallObstacleHeight),
     ]
+}
+
+function Enemy() {
+    this.srcX = 48;
+    this.srcY = 480;
+    this.width = 16;
+    this.height = 16;
+    this.drawX = randomRange(0, canvasWidth - this.width);
+    this.drawY = randomRange(0, canvasHeight - this.height);
+    this.centerX = this.drawX + (this.width / 2);
+    this.centerY = this.drawY + (this.height / 2);
+    //this.targetX = this.centerX;
+    //this.targetY = this.centerY;
+    //this.randomMoveTime = random(4000, 100000);
+    this.speed = 1;
+    //var that = this;
+    //this.moveInterval = setInterval(function() {that.setTargetLocation(); }, that.randomMoveTime)
+    this.isDead = false;
+}
+
+Enemy.prototype.update = function () {
+    //this.checkDirection();
+    this.centerX = this.drawX + (this.width / 2);
+    this.centerY = this.drawY + (this.height / 2);
+};
+
+Enemy.prototype.draw = function () {
+    ctxEntities.drawImage(imgSprite, this.srcX, this.srcY, this.width, this.height, this.drawX, this.drawY, this.width, this.height)
+};
+
+function initEnemies() {
+    for (let i = 0; i < numEnemies; i++) {
+        enemies[enemies.length] = new Enemy();
+    }
+}
+
+function updateAllEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        enemies[i].update();
+    }
+}
+
+function drawAllEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        enemies[i].draw();
+    }
 }
 
 function checkKey(event, value) {
