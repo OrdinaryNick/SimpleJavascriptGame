@@ -5,7 +5,7 @@ const canvasBg = document.getElementById("canvasBg"),
 
 const canvasWidth = canvasBg.width,
     canvasHeight = canvasBg.height,
-    topPadding = 104;
+    topPadding = 0;
 
 const player = new Player();
 let enemies = [];
@@ -155,10 +155,10 @@ Player.prototype.checkObstacleCollide = function (newDrawX, newDrawY) {
 
     for (let i = 0; i < obstacles.length; i++) {
         obstacle = obstacles[i];
-        if (obstacle.leftX - 6 < newCenterX &&
+        if (obstacle.leftX - 8 < newCenterX &&
             newCenterX < obstacle.rightX + 8 &&
-            obstacle.topY < newCenterY &&
-            newCenterY < obstacle.bottomY + 12) {
+            obstacle.topY - 8 < newCenterY &&
+            newCenterY < obstacle.bottomY) {
             obstacleCounter = 0;
         } else {
             obstacleCounter++;
@@ -184,8 +184,8 @@ function Obstacle(x, y, w, h) {
 }
 
 function defineObstacles() {
-    const tileWidth = 12,
-        tileHeight = 12,
+    const tileWidth = 16,
+        tileHeight = 16,
         smallObstacleWidth = tileWidth,
         smallObstacleHeight = tileHeight,
         pillarWidth = 3 * tileWidth,
@@ -360,9 +360,9 @@ function outOfBounds(object, x, y) {
         newRightX = x + object.width,
         newLeftX = x,
         topBorder = topPadding + 16,
-        bottomBorder = 480 + 4 - 16,
-        rightBorder = 480 + 4 - 16,
-        leftBorder = 12;
+        bottomBorder = 480 + 6 - 16,
+        rightBorder = 640 - 16,
+        leftBorder = 16;
 
     return newBottomY > bottomBorder ||
         newTopY < topBorder ||

@@ -1,6 +1,5 @@
 body {
     background-color: darkgray;
-    height: 640px;
 }
 
 canvas {
@@ -12,6 +11,6 @@ canvas {
 }
 
 #overlapping canvas{
-    margin: -640px 0 0 0;
-    height: 640px;
+    top: 0;
+    position: absolute;
 }
