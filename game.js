@@ -95,14 +95,15 @@ function Player() {
     this.isDownKey = false;
     this.isLeftKey = false;
     this.isSpacebar = false;
-    // this.isShooting = false;
+    this.facingSouth = false;
+    this.isShooting = false;
     // Shooting variables
-    //var numBullets = 10;
-    // this.bullets = [];
-    // this.currentBullet = 0;
-    // for (var i = 0; i < numBullets; i++) {
-    //     this.bullets[this.bullets.length] = new Bullet();
-    // }
+    var numBullets = 10;
+    this.bullets = [];
+    this.currentBullet = 0;
+    for (let i = 0; i < numBullets; i++) {
+        this.bullets[this.bullets.length] = new Bullet();
+    }
 }
 
 // Adding method to object
@@ -111,12 +112,12 @@ Player.prototype.update = function () {
     this.centerY = this.drawY + (this.height / 2);
 
     this.checkDirection();
-    //this.checkShooting();
-    //this.updateAllBullets();
+    this.checkShooting();
+    this.updateAllBullets();
 };
 
 Player.prototype.draw = function () {
-    // this.drawAllBullets();
+    this.drawAllBullets();
     ctxEntities.drawImage(imgSprite, this.srcX, this.srcY, this.width, this.height, this.drawX, this.drawY, this.width, this.height);
 };
 
@@ -130,10 +131,12 @@ Player.prototype.checkDirection = function () {
         this.srcX = 32; // Facing north
     } else if (this.isDownKey) {
         newDrawY += this.speed;
-        this.srcX = 0; // South north
+        this.srcX = 0; // Facing south
+        this.facingSouth = true;
     } else if (this.isRightKey) {
         newDrawX += this.speed;
         this.srcX = 0; // Facing east
+        this.facingSouth = false;
     } else if (this.isLeftKey) {
         newDrawX -= this.speed;
         this.srcX = 16; // Facing west
@@ -169,6 +172,35 @@ Player.prototype.checkObstacleCollide = function (newDrawX, newDrawY) {
         return false;
     } else {
         return true;
+    }
+};
+
+Player.prototype.checkShooting = function () {
+    if (this.isSpacebar && !this.isShooting) {
+        this.isShooting = true;
+        this.bullets[this.currentBullet].fire(this.centerX, this.centerY);
+        this.currentBullet++;
+        if (this.currentBullet >= this.bullets.length) {
+            this.currentBullet = 0;
+        }
+    } else if (!this.isSpacebar) {
+        this.isShooting = false;
+    }
+};
+
+Player.prototype.updateAllBullets = function () {
+    for (let i = 0; i < this.bullets.length; i++) {
+        if (this.bullets[i].isFlying) {
+            this.bullets[i].update();
+        }
+    }
+};
+
+Player.prototype.drawAllBullets = function () {
+    for (let i = 0; i < this.bullets.length; i++) {
+        if (this.bullets[i].isFlying) {
+            this.bullets[i].draw();
+        }
     }
 };
 
@@ -350,7 +382,7 @@ Enemy.prototype.checkDirection = function () {
 };
 
 Enemy.prototype.die = function () {
-    const soundEffect = new Audio("audio/dying.wav");
+    const soundEffect = new Audio("audio/dying.ogg");
     soundEffect.play();
 
     clearInterval(this.moveInterval);
@@ -375,6 +407,88 @@ function drawAllEnemies() {
         enemies[i].draw();
     }
 }
+
+function Bullet() {
+    this.radius = 2;
+    this.width = this.radius * 2;
+    this.height = this.radius * 2;
+    this.drawX = 0;
+    this.drawY = 0;
+    this.isFlying = false;
+    this.xVel = 0;
+    this.yVel = 0;
+    this.speed = 6;
+}
+
+Bullet.prototype.update = function () {
+    this.drawX += this.xVel;
+    this.drawY += this.yVel;
+    this.checkHitEnemy();
+    this.checkHitObstacle();
+    this.checOutOfBounds();
+};
+
+Bullet.prototype.draw = function () {
+    ctxEntities.fillStyle = "green";
+
+    ctxEntities.beginPath();
+    ctxEntities.arc(this.drawX, this.drawY, this.radius, 0, Math.PI * 2, false);
+    ctxEntities.closePath();
+
+    ctxEntities.fill();
+};
+
+Bullet.prototype.fire = function (startX, startY) {
+    let soundEffect = new Audio("audio/shoot.ogg");
+    this.drawX = startX;
+    this.drawY = startY;
+
+    if (player.srcX === 0) { // Facing south or east
+        if (player.facingSouth) {
+            this.xVel = 0;
+            this.yVel = this.speed;
+        } else {
+            this.xVel = this.speed;
+            this.yVel = 0;
+        }
+    } else if (player.srcX === 32) { // Facing north
+        this.xVel = 0;
+        this.yVel = -this.speed;
+    } else if (player.srcX === 16) { // Facing west
+        this.xVel = -this.speed;
+        this.yVel = 0;
+    }
+
+    this.isFlying = true;
+    soundEffect.play();
+};
+
+Bullet.prototype.recycle = function () {
+    this.isFlying = false;
+};
+
+Bullet.prototype.checkHitEnemy = function () {
+    for (let i = 0; i < enemies.length; i++) {
+        if (collision(this, enemies[i]) && !enemies[i].isDead) {
+            this.recycle();
+            enemies[i].die();
+        }
+    }
+};
+
+Bullet.prototype.checkHitObstacle = function () {
+    for (let i = 0; i < obstacles.length; i++) {
+        if (collision(this, obstacles[i])) {
+            this.recycle();
+        }
+    }
+};
+
+Bullet.prototype.checOutOfBounds = function () {
+    if (outOfBounds(this, this.drawX, this.drawY)) {
+        this.recycle();
+    }
+};
 
 function checkKey(event, value) {
     const keyId = event.keyCode || event.which;
@@ -417,4 +531,11 @@ function outOfBounds(object, x, y) {
         newTopY < topBorder ||
         newRightX > rightBorder ||
         newLeftX < leftBorder;
+}
+
+function collision(objectA, objectB) {
+    return objectA.drawX <= objectB.drawX + objectB.width &&
+        objectA.drawX >= objectB.drawX &&
+        objectA.drawY <= objectB.drawY + objectB.height &&
+        objectA.drawY >= objectB.drawY;
 }
