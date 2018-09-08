@@ -75,7 +75,7 @@ Player.prototype.checkDirection = function () {
 };
 
 Player.prototype.checkObstacleCollide = function (newDrawX, newDrawY) {
-    var obstacleCounter = 0,
+    let obstacleCounter = 0,
         newCenterX = newDrawX + (this.width / 2),
         newCenterY = newDrawY + (this.height / 2),
         obstacle;
@@ -92,11 +92,7 @@ Player.prototype.checkObstacleCollide = function (newDrawX, newDrawY) {
         }
     }
 
-    if (obstacleCounter === obstacles.length) {
-        return false;
-    } else {
-        return true;
-    }
+    return obstacleCounter !== obstacles.length;
 };
 
 Player.prototype.checkShooting = function () {

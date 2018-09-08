@@ -12,7 +12,7 @@ function Enemy() {
     this.targetY = this.centerY;
     this.randomMoveTime = randomRange(3000, 8000);
     this.speed = 1;
-    // Variable for helper function in setInverval.
+    // Variable for helper function in setInterval.
     const that = this;
     this.moveInterval = setInterval(function () {
         that.setTargetLocation();

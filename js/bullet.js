@@ -1,7 +1,5 @@
 function Bullet() {
     this.radius = 2;
-    this.width = this.radius * 2;
-    this.height = this.radius * 2;
     this.drawX = 0;
     this.drawY = 0;
     this.isFlying = false;
@@ -15,7 +13,7 @@ Bullet.prototype.update = function () {
     this.drawY += this.yVel;
     this.checkHitEnemy();
     this.checkHitObstacle();
-    this.checOutOfBounds();
+    this.checkOutOfBounds();
 };
 
 Bullet.prototype.draw = function () {
@@ -74,7 +72,7 @@ Bullet.prototype.checkHitObstacle = function () {
     }
 };
 
-Bullet.prototype.checOutOfBounds = function () {
+Bullet.prototype.checkOutOfBounds = function () {
     if (outOfBounds(this, this.drawX, this.drawY)) {
         this.recycle();
     }
